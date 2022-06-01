@@ -14,6 +14,10 @@ from datetime import datetime
 import sys
 import pyautogui
 import pickle
+import time
+
+
+
 
 # Data Model
 
@@ -186,6 +190,9 @@ def move_hand(prediction):
 def rx_and_echo():
     signal_sum = 0
     a = [[]]
+    start = time.time() + 10.0
+    end = time.time()
+    difference = 0
     while True:
         var_data = sock.recv(buf_size)
         if var_data: 
@@ -194,27 +201,21 @@ def rx_and_echo():
             l.config(text = "Signal Value: " + str(int_data))
             signalValue.append(int_data)
 
-            difference = 0
-            a[0].append(int_data)
-            if(len(a[0]) == 50) :
-                predictions = knn_model.predict(a)
-                move_hand(predictions)
-                signalValue.clear()
-                a[0].clear()
-                signal_sum = 0
+            end = time.time()
+#
+            if(len(signalValue) > 50):
+                difference = abs(signalValue[-1] - signalValue[-50])
+
+            if(difference > 25):
+                timeDiff = end - start
+                if(timeDiff > 5) : 
+                    print(timeDiff)
+                    pyautogui.press("b")
+                    time.sleep(1)
+                    pyautogui.press("b")
+                    start = time.time()
 
 
-
-#dataframe
-
-""" 
-            if(len(signalValue) > 20):
-                difference = abs(signalValue[-1] - signalValue[-20])
-
-            if(difference > 100):
-                pyautogui.press("g")
-            if(difference < 100):
-                pyautogui.press("h") """
             #int_data = int(re.search(r'\d+', str(var_data)).group()) 
 
 
